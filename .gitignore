@@ -1,0 +1,15 @@
+*~
+*.sw*
+*node_modules
+*/.env
+todo*
+.prettierrc.json
+**/.vscode/*
+*built/
+*build/
+*bundle.js
+*.sh
+*.vim
+**/tmp/**
+**upload**
+**token**
