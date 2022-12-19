@@ -144,6 +144,7 @@ drop table if exists driver_review cascade;
 
 create table if not exists driver_review (
 	review_id				bigserial			primary key,
+	driver_id				bigint				not	null		references	driver on delete cascade,
 	rider_id				bigint				not null		references	rider on delete cascade,
 	transaction_id			bigint				not null		references	transaction on delete cascade,
 	rating					numeric(3,2)	not null,
