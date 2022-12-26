@@ -10,7 +10,8 @@ create table if not exists user_account (
 	check (phone ~* '^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$'),			
 	password				bytea			not null,
 	dob						date			not null,
-	check (current_date - dob > 12)
+	-- riders and drivers should not be less that 18 years of age
+	check (current_date - dob > 17)
 );
 
 create table if not exists passenger (
@@ -20,21 +21,14 @@ create table if not exists passenger (
 
 create table if not exists driver (
 	driver_id		bigserial 		primary key	references	user_account	on	delete	cascade
-	-- Create a constraint that excludes drivers under 18 
 );
 
 
 drop table if exists vehicle cascade;
 
 create table if not exists vehicle (
-	vehicle_id			bigserial			primary key,
-	title				varchar,
-	category			varchar,
-	description			varchar,
-	list_price			numeric(19,4),
-	net_price			numeric(19,4),
+	vin 				varchar			primary key,
 	driver_id 			bigint			not null 		unique 		references	driver	on	delete	cascade,
-	quantity_available	int					not null
 );
 
 

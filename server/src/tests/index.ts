@@ -9,6 +9,8 @@ import testUserAccount from "./accounts/user";
  */
 describe("Authentication Routes", Authentication);
 describe("User Account Routes", testUserAccount);
+/*
 describe("Passenger Account Routes", testPassengerAccount);
 describe("Driver Account Routes", testDriverAccount);
 describe("Vehicle Routes", testVehicle);
+*/
