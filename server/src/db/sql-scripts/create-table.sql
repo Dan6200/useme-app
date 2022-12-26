@@ -10,134 +10,42 @@ create table if not exists user_account (
 	check (phone ~* '^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$'),			
 	password				bytea			not null,
 	dob						date			not null,
-	country					varchar			not null,
 	check (current_date - dob > 12)
 );
 
-create table if not exists rider (
-	rider_id			bigint 		primary key	references	user_account	on	delete	cascade
+create table if not exists passenger (
+	passenger_id			bigint 		primary key	references	user_account	on	delete	cascade
 );
 
-drop table if exists shipping_info cascade;
-
-create table if not exists shipping_info (
-	address_id				bigserial			primary key,
-	rider_id				bigint				not null		references	rider	on	delete	cascade,
-	recipient_first_name	varchar(30)		not null,
-	recipient_last_name		varchar(30)		not null,
-	street					varchar			not null,
-	postal_code				varchar			not null,
-	delivery_contact		varchar			not	null,
-	delivery_instructions	varchar,
-	is_primary				boolean			not null
-);
 
 create table if not exists driver (
 	driver_id		bigserial 		primary key	references	user_account	on	delete	cascade
+	-- Create a constraint that excludes drivers under 18 
 );
 
-drop table if exists shop cascade;
 
-create table if not exists shop (
-	shop_id					bigserial			primary key,	
-	shop_name				varchar				not null 	default 	'My Shop',
-	driver_id 				bigint			not null 	unique 		references	driver	on	delete	cascade,
-	date_created			date				not null	default		current_date,
-	banner_image_path			varchar
-);
+drop table if exists vehicle cascade;
 
-drop table if exists product cascade;
-
-create table if not exists product (
-	product_id			bigserial			primary key,
+create table if not exists vehicle (
+	vehicle_id			bigserial			primary key,
 	title				varchar,
 	category			varchar,
 	description			varchar,
 	list_price			numeric(19,4),
 	net_price			numeric(19,4),
 	driver_id 			bigint			not null 		unique 		references	driver	on	delete	cascade,
-	shop_id				bigint			unique,
 	quantity_available	int					not null
 );
 
-drop table if exists flagship_product cascade;
 
-create table if not exists flagship_product (
-	product_id			bigint			unique			not null		references	product		on	delete	cascade,
-	title				varchar,
-	category			varchar,
-	description			varchar,
-	list_price			numeric(19,4),
-	net_price			numeric(19,4),
-	quantity_available	int					not null
-);
+drop table if exists vehicle_image cascade;
 
-drop table if exists product_media cascade;
-
-create table if not exists product_media (
-	product_id					bigint				primary key		references	product	on	delete	cascade,
+create table if not exists vehicle_media (
+	vehicle_id					bigint				primary key		references	vehicle	on	delete	cascade,
 	filename 					varchar 			not null,
 	filepath 					varchar 			not null,
 	filesize 					int,
-	mimetype 					varchar 			not null,
-	encoding 					varchar,
 	description					varchar
-);
-
-/* TODO: review this shopping cart functionality to see if it is rigorous enough
-	...this is would be a transaction type of operation. */
-drop table if exists shopping_cart cascade;
-
-create table if not exists shopping_cart (
-	cart_id				bigserial			primary key,
-	rider_id			bigint				not null	references	rider	on	delete	cascade,
-	made				timestamptz		not null	default	now()
-);
-
-drop table if exists shopping_cart_item cascade;
-
-create table if not exists shopping_cart_item (
-	item_id					bigserial			primary	key,
-	cart_id					bigint				not null		references	shopping_cart	on 	delete	cascade,
-	product_id				bigint				not null		references	product		on delete	cascade,
-	product_quantity		int				not null		check (product_quantity > 0)
-);
-
-drop table if exists transaction cascade;
-
-create table if not exists transaction (
-	transaction_id				bigserial			primary	key,
-	transaction_timestamp		timestamptz		not null		default	now()	unique,
-	rider_id					bigint				not null,
-	driver_id					bigint				not null,
-	transaction_amount			numeric(19,4)	not null,
-	check (rider_id <> driver_id)
-);
-
-drop table if exists transaction_item cascade;
-
-create table if not exists transaction_item (
-	item_id					bigserial			primary	key,
-	product_id				bigint				not null		references	product		on delete	cascade,
-	product_quantity		int				not null		default	1	check (product_quantity > 0)
-);
-
-drop table if exists reversed_transaction cascade;
-
-create table if not exists reversed_transaction (
-	rev_transaction_id		bigint			primary	key	references	transaction		on	delete	cascade,
-	rev_trans_timestamp			timestamptz		not null	default	now()	unique
-);
-
-drop table if exists product_review cascade;
-
-create table if not exists product_review (
-	review_id				bigserial			primary key,
-	product_id				bigint				not null	references	product		on	delete	cascade,
-	transaction_id			bigint				not null	references	transaction	on	delete	cascade,
-	rating					numeric(3,2)	not null,
-	rider_id				bigint				not	null	references	rider	on	delete	cascade,
-	rider_remark			varchar
 );
 
 drop table if exists driver_review cascade;
@@ -145,8 +53,8 @@ drop table if exists driver_review cascade;
 create table if not exists driver_review (
 	review_id				bigserial			primary key,
 	driver_id				bigint				not	null		references	driver on delete cascade,
-	rider_id				bigint				not null		references	rider on delete cascade,
+	passenger_id				bigint				not null		references	passenger on delete cascade,
 	transaction_id			bigint				not null		references	transaction on delete cascade,
 	rating					numeric(3,2)	not null,
-	rider_remark			varchar
+	passenger_remark			varchar
 );
